@@ -519,18 +519,13 @@ async def main(page: ft.Page):
     )
 
     header = ft.Container(
-        content=ft.Row(
+        content=ft.Column(
             [
-                ft.Column(
-                    [
-                        ft.Text("🎪 TOP - TOP Əyləncə Mərkəzi", size=20, weight=ft.FontWeight.BOLD, color=TEXT),
-                        subtitle_text,
-                    ],
-                    spacing=2,
-                ),
-                ft.Row([nav_btn, add_btn], spacing=10),
+                ft.Text("🎪 TOP - TOP Əyləncə Mərkəzi", size=18, weight=ft.FontWeight.BOLD, color=TEXT),
+                subtitle_text,
+                ft.Row([nav_btn, add_btn], spacing=10, wrap=True),
             ],
-            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+            spacing=8,
         ),
         padding=16,
         bgcolor=BG,
