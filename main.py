@@ -3,7 +3,7 @@
 TOP - TOP Əyləncə Mərkəzi (Flet versiyası - Android APK üçün)
 Optimallaşdırılmış Deluxe & Premium Dizayn (Mobil uyğun, animasiyalı, Azərbaycan əlifbası dəstəkli)
 
-Lokal test: flet run main.py
+Lokal test: flet run script.py
 APK qurmaq: flet build apk
 """
 
@@ -17,24 +17,27 @@ import flet as ft
 DATA_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "top_data.json")
 
 # ---------------- Premium & Deluxe Rənglər ----------------
-BG = "#070b19"          # Dərin qaranlıq göy fon
-CARD_BG = "#111827"     # Kartlar üçün şık tünd rəng
-CARD_WARN = "#581c87"   # Vaxtı azalanlar üçün bənövşəyi-tünd qırmızı ton
+BG = "#070b19"  # Dərin qaranlıq göy fon
+CARD_BG = "#111827"  # Kartlar üçün şık tünd rəng
+CARD_WARN = "#581c87"  # Vaxtı azalanlar üçün bənövşəyi-tünd qırmızı ton
 CARD_WARN2 = "#7e22ce"  # Yanıb-sönmə effekti üçün
-ACCENT = "#06b6d4"      # Canlı neon mavi (Cyan)
-GREEN = "#10b981"       # Uğurlu / Normal vaxt yaşı
-ORANGE = "#f59e0b"      # Xəbərdarlıq sarısı
-RED = "#f43f5e"         # Təcili qırmızı / Bitmiş vaxt
-TEXT = "#f8fafc"        # Əsas mətn rəngi
-MUTED = "#94a3b8"       # İkincil mətn rəngi
+ACCENT = "#06b6d4"  # Canlı neon mavi (Cyan)
+GREEN = "#10b981"  # Uğurlu / Normal vaxt yaşı
+ORANGE = "#f59e0b"  # Xəbərdarlıq sarısı
+RED = "#f43f5e"  # Təcili qırmızı / Bitmiş vaxt
+TEXT = "#f8fafc"  # Əsas mətn rəngi
+MUTED = "#94a3b8"  # İkincil mətn rəngi
 WHITE = "#ffffff"
-GOLD = "#fbbf24"        # Deluxe detallar üçün qızılı ton
+GOLD = "#fbbf24"  # Deluxe detallar üçün qızılı ton
+
 
 def now():
     return datetime.now()
 
+
 def fmt_time(dt):
     return dt.strftime("%H:%M")
+
 
 def fmt_remaining(seconds):
     if seconds == float('inf') or seconds is None:
@@ -44,6 +47,7 @@ def fmt_remaining(seconds):
     m = int(seconds // 60)
     s = int(seconds % 60)
     return f"{m:02d}:{s:02d}"
+
 
 # ---------------- Data qatı ----------------
 class Store:
@@ -116,7 +120,7 @@ async def main(page: ft.Page):
     page.padding = 0
     page.theme_mode = ft.ThemeMode.DARK
     page.scroll = None
-    
+
     # Mobil üçün tam ekran və düzgün hizalama
     page.vertical_alignment = ft.MainAxisAlignment.START
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
@@ -125,7 +129,7 @@ async def main(page: ft.Page):
     await store.load()
 
     state = {
-        "view": "main",         # "main" | "logs"
+        "view": "main",  # "main" | "logs"
         "alerted_ids": set(),
         "new_ids": set(),
         "alert_queue": [],
@@ -143,7 +147,7 @@ async def main(page: ft.Page):
         bgcolor="#000000DD",
         left=0, top=0, right=0, bottom=0,
         padding=15,
-        alignment=ft.alignment.center,
+        alignment=ft.alignment.Alignment(0, 0),
         animate_opacity=300,
     )
 
@@ -169,7 +173,7 @@ async def main(page: ft.Page):
         overlay_container.visible = False
         page.update()
 
-    # ---------- Kart Qurucu (Mobil üçün tam uyğun) ----------
+    # ---------- Kart Qurucu ----------
     def build_card(c, remaining):
         is_infinite = c.get("exit") is None
         is_warn = not is_infinite and (0 < remaining <= 180)
@@ -202,19 +206,19 @@ async def main(page: ft.Page):
 
         action_buttons = [
             ft.Container(
-                content=ft.ElevatedButton(
-                    "+30 dəq", 
-                    bgcolor=ACCENT, 
+                content=ft.Button(
+                    "+30 dəq",
+                    bgcolor=ACCENT,
                     color="#070b19",
-                    on_click=on_extend, 
+                    on_click=on_extend,
                     height=32,
                     style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=5)
                 ),
                 visible=not is_infinite
             ),
-            ft.ElevatedButton(
-                "Bitir / Sil", 
-                height=32, 
+            ft.Button(
+                "Bitir / Sil",
+                height=32,
                 bgcolor="#1e293b",
                 color=RED,
                 on_click=on_delete,
@@ -243,13 +247,13 @@ async def main(page: ft.Page):
             bgcolor=bg,
             border_radius=16,
             padding=14,
-            border=ft.border.all(1, "#1e293b"),
+            border=ft.BorderSide(1, "#1e293b"),
             animate=ft.Animation(350, ft.AnimationCurve.EASE_IN_OUT),
             animate_opacity=300,
             opacity=1,
             shadow=ft.BoxShadow(blur_radius=10, color="#00000044", offset=ft.Offset(0, 4))
         )
-        
+
         if c["id"] in state["new_ids"]:
             card.opacity = 0
             state["new_ids"].discard(c["id"])
@@ -267,7 +271,7 @@ async def main(page: ft.Page):
     def render():
         list_column.controls.clear()
         n = now()
-        
+
         if state["view"] == "logs":
             subtitle_text.value = "Günün tarixçəsi və bitən seanslar"
             if not store.logs:
@@ -277,7 +281,7 @@ async def main(page: ft.Page):
                             ft.Text("📜", size=40),
                             ft.Text("Bugün üçün log qeydi yoxdur", color=MUTED, size=14)
                         ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
-                        padding=40, alignment=ft.alignment.center
+                        padding=40, alignment=ft.alignment.Alignment(0, 0)
                     )
                 )
             for log in store.logs:
@@ -290,19 +294,20 @@ async def main(page: ft.Page):
                 ]
                 if log.get("note"):
                     items.append(ft.Text(f"📝 {log['note']}", size=11, color=ACCENT))
-                
+
                 status_color = RED if "bitib" in log.get("status", "").lower() else MUTED
                 list_column.controls.append(
                     ft.Container(
                         content=ft.Row(
                             [
                                 ft.Column(items, expand=True, spacing=2),
-                                ft.Text(log.get("status", "Bitib"), size=11, weight=ft.FontWeight.BOLD, color=status_color),
+                                ft.Text(log.get("status", "Bitib"), size=11, weight=ft.FontWeight.BOLD,
+                                        color=status_color),
                             ],
                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                         ),
                         bgcolor=CARD_BG, border_radius=14, padding=14,
-                        border=ft.border.all(1, "#1e293b")
+                        border=ft.BorderSide(1, "#1e293b")
                     )
                 )
         else:
@@ -316,23 +321,24 @@ async def main(page: ft.Page):
                     exit_dt = datetime.fromisoformat(c["exit"])
                     remaining = (exit_dt - n).total_seconds()
                 items.append((remaining, c))
-            
+
             items.sort(key=lambda x: (x[0] == float('inf'), x[0]))
-            
+
             if not items:
                 list_column.controls.append(
                     ft.Container(
                         content=ft.Column([
                             ft.Text("🎈", size=50),
                             ft.Text("Hazırda batutda uşaq yoxdur", color=MUTED, size=15, weight=ft.FontWeight.BOLD),
-                            ft.Text("Yeni uşaq əlavə etmək üçün düyməni istifadə edin.", color=MUTED, size=12, text_align=ft.TextAlign.CENTER)
+                            ft.Text("Yeni uşaq əlavə etmək üçün düyməni istifadə edin.", color=MUTED, size=12,
+                                    text_align=ft.TextAlign.CENTER)
                         ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=8),
-                        padding=60, alignment=ft.alignment.center
+                        padding=60, alignment=ft.alignment.Alignment(0, 0)
                     )
                 )
             for remaining, c in items:
                 list_column.controls.append(build_card(c, remaining))
-        
+
         page.update()
 
     # ---------- Vaxt Artırma və Silmə ----------
@@ -370,8 +376,8 @@ async def main(page: ft.Page):
                 ft.Row(
                     [
                         ft.TextButton("Xeyr", on_click=confirm_no),
-                        ft.ElevatedButton("Bəli, Sil", bgcolor=RED, color=WHITE, on_click=confirm_yes,
-                                         style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))),
+                        ft.Button("Bəli, Sil", bgcolor=RED, color=WHITE, on_click=confirm_yes,
+                                  style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))),
                     ],
                     alignment=ft.MainAxisAlignment.END,
                     spacing=10,
@@ -381,7 +387,7 @@ async def main(page: ft.Page):
         )
         show_modal(box)
 
-    # ---------- Vaxtı Bitən Uşaq Üçün Xəbərdarlıq ----------
+    # ---------- Xəbərdarlıق ----------
     def show_expire_alert(child):
         state["alert_open"] = True
 
@@ -405,9 +411,10 @@ async def main(page: ft.Page):
         box = ft.Column(
             [
                 ft.Text("⏰", size=40, text_align=ft.TextAlign.CENTER),
-                ft.Text(f"{child['name']} üçün vaxt bitdi!", size=20, weight=ft.FontWeight.BOLD, color=WHITE, text_align=ft.TextAlign.CENTER),
+                ft.Text(f"{child['name']} üçün vaxt bitdi!", size=20, weight=ft.FontWeight.BOLD, color=WHITE,
+                        text_align=ft.TextAlign.CENTER),
                 *note_controls,
-                ft.ElevatedButton(
+                ft.Button(
                     "Anladım / Bağla", bgcolor=WHITE, color=RED,
                     on_click=close_alert,
                     style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10), padding=12)
@@ -425,7 +432,7 @@ async def main(page: ft.Page):
         child = state["alert_queue"].pop(0)
         show_expire_alert(child)
 
-    # ---------- Yeni Uşaq Əlavə Etmə Dialoqu (30 dq, 60 dq, Limitsiz) ----------
+    # ---------- Yeni Uşaq Əlavə Etmə Dialoqu ----------
     def open_add_child(e):
         name_fields_col = ft.Column(spacing=8)
         name_entries = []
@@ -467,31 +474,51 @@ async def main(page: ft.Page):
         duration_state = {"value": 30}
         duration_buttons = {}
 
+        custom_dur_field = ft.TextField(
+            label="Dəqiqəni daxil et (məs: 45)",
+            bgcolor=CARD_BG, color=TEXT, border_radius=10,
+            border_color="#334155", focused_border_color=ACCENT,
+            text_size=13, height=45, keyboard_type=ft.KeyboardType.NUMBER,
+            visible=False
+        )
+
         def select_duration(val):
             duration_state["value"] = val
-            for v, b in duration_buttons.items():
-                if v == val:
-                    b.bgcolor = ACCENT
-                    b.color = "#070b19"
-                else:
-                    b.bgcolor = CARD_BG
-                    b.color = TEXT
+            if val == "custom":
+                custom_dur_field.visible = True
+                for v, b in duration_buttons.items():
+                    if v == "custom":
+                        b.bgcolor = ACCENT
+                        b.color = "#070b19"
+                    else:
+                        b.bgcolor = CARD_BG
+                        b.color = TEXT
+            else:
+                custom_dur_field.visible = False
+                for v, b in duration_buttons.items():
+                    if v == val:
+                        b.bgcolor = ACCENT
+                        b.color = "#070b19"
+                    else:
+                        b.bgcolor = CARD_BG
+                        b.color = TEXT
             page.update()
 
         durations_def = [
             (30, "30 dəq"),
             (60, "60 dəq"),
-            (None, "Limitsiz ∞")
+            (None, "Limitsiz"),
+            ("custom", "✏️ Əllə yaz")
         ]
 
-        dur_row = ft.Row(spacing=8, alignment=ft.MainAxisAlignment.CENTER)
+        dur_row = ft.Row(spacing=6, alignment=ft.MainAxisAlignment.CENTER)
         for val, label in durations_def:
-            btn = ft.ElevatedButton(
+            btn = ft.Button(
                 label,
                 bgcolor=ACCENT if val == 30 else CARD_BG,
                 color="#070b19" if val == 30 else TEXT,
                 on_click=lambda e, v=val: select_duration(v),
-                style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=10),
+                style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=6),
                 expand=True
             )
             duration_buttons[val] = btn
@@ -506,12 +533,19 @@ async def main(page: ft.Page):
 
         async def save_children(e):
             n_val = now()
+            dur = duration_state["value"]
+
+            if dur == "custom":
+                try:
+                    dur = int(custom_dur_field.value.strip())
+                except Exception:
+                    dur = 30  # Səhv yazılarsa standart 30 dəq götür
+
             added_any = False
             for tf in name_entries:
                 val_name = tf.value.strip() if tf.value else ""
                 if val_name:
                     added_any = True
-                    dur = duration_state["value"]
                     exit_dt = (n_val + timedelta(minutes=dur)) if dur is not None else None
                     child = await store.add_child(val_name, n_val, exit_dt, note_field.value.strip())
                     state["new_ids"].add(child["id"])
@@ -522,17 +556,19 @@ async def main(page: ft.Page):
         content_col = ft.Column(
             [
                 ft.Text("Yeni Uşaq Qeydiyyatı", size=18, weight=ft.FontWeight.BOLD, color=TEXT),
-                ft.Row([ft.Text("Giriş vaxtı:", size=13, color=MUTED), entry_time_text], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                ft.Row([ft.Text("Giriş vaxtı:", size=13, color=MUTED), entry_time_text],
+                       alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                 name_fields_col,
                 add_row_btn,
                 ft.Text("Seans müddəti:", size=13, color=MUTED),
                 dur_row,
+                custom_dur_field,
                 note_field,
                 ft.Row(
                     [
                         ft.TextButton("İmtina", on_click=hide_modal),
-                        ft.ElevatedButton("Təsdiq Et & Başlat", bgcolor=GREEN, color=WHITE, on_click=save_children,
-                                         style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10))),
+                        ft.Button("Təsdiq Et & Başlat", bgcolor=GREEN, color=WHITE, on_click=save_children,
+                                  style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10))),
                     ],
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 ),
@@ -556,8 +592,10 @@ async def main(page: ft.Page):
             tab_active_btn.color = TEXT
         render()
 
-    tab_active_btn = ft.ElevatedButton("Aktivlər", bgcolor=ACCENT, color="#070b19", on_click=lambda e: switch_view("main"), style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)))
-    tab_logs_btn = ft.ElevatedButton("Tarixçə", bgcolor=CARD_BG, color=TEXT, on_click=lambda e: switch_view("logs"), style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)))
+    tab_active_btn = ft.Button("Aktivlər", bgcolor=ACCENT, color="#070b19", on_click=lambda e: switch_view("main"),
+                               style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)))
+    tab_logs_btn = ft.Button("Tarixçə", bgcolor=CARD_BG, color=TEXT, on_click=lambda e: switch_view("logs"),
+                             style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)))
 
     header_row = ft.Container(
         content=ft.Row([
@@ -570,7 +608,7 @@ async def main(page: ft.Page):
             ], spacing=8),
             ft.Row([tab_active_btn, tab_logs_btn], spacing=6)
         ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-        padding=12, bgcolor="#0f172a", border=ft.border.only(bottom=ft.BorderSide(1, "#1e293b"))
+        padding=12, bgcolor="#0f172a", border=ft.BorderSide(1, "#1e293b")
     )
 
     # ---------- Əsas Səhifə Struktur ----------
@@ -579,14 +617,17 @@ async def main(page: ft.Page):
             header_row,
             ft.Container(
                 content=ft.Row([subtitle_text], alignment=ft.MainAxisAlignment.START),
-                padding=ft.padding.symmetric(horizontal=16, vertical=4)
+                padding=ft.padding.symmetric(horizontal=16, vertical=4) if hasattr(ft, "padding") and hasattr(
+                    ft.padding, "symmetric") else 10
             ),
-            ft.Container(content=list_column, expand=True, padding=ft.padding.symmetric(horizontal=8)),
-            
-            # Alt Əlavə Et Düyməsi və Owner Bilgisi
+            ft.Container(content=list_column, expand=True,
+                         padding=ft.padding.symmetric(horizontal=8) if hasattr(ft, "padding") and hasattr(ft.padding,
+                                                                                                          "symmetric") else 8),
+
+            # Alt Əlavə Et Düyməsi və Owner Bilgisi (Böyüdülmüş və Qalın)
             ft.Container(
                 content=ft.Column([
-                    ft.ElevatedButton(
+                    ft.Button(
                         "＋ Yeni Uşaq Əlavə Et",
                         bgcolor=ACCENT,
                         color="#070b19",
@@ -599,14 +640,15 @@ async def main(page: ft.Page):
                         )
                     ),
                     ft.Container(
-                        content=ft.Text("Owner by Sərkər Qubadov", size=11, color=MUTED, weight=ft.FontWeight.W_500, text_align=ft.TextAlign.CENTER),
-                        alignment=ft.alignment.center,
-                        padding=ft.padding.only(top=6)
+                        content=ft.Text("Owner by Sərkər Qubadov", size=13, color=ACCENT, weight=ft.FontWeight.BOLD,
+                                        text_align=ft.TextAlign.CENTER),
+                        alignment=ft.alignment.Alignment(0, 0),
+                        padding=ft.padding.only(top=8) if hasattr(ft, "padding") and hasattr(ft.padding, "only") else 8
                     )
-                ], spacing=4),
+                ], spacing=6),
                 padding=12,
                 bgcolor="#0f172a",
-                border=ft.border.only(top=ft.BorderSide(1, "#1e293b"))
+                border=ft.BorderSide(1, "#1e293b")
             )
         ], spacing=0),
         expand=True
@@ -626,26 +668,27 @@ async def main(page: ft.Page):
         while True:
             await asyncio.sleep(1)
             await store.check_daily_reset()
-            
+
             n = now()
             state["blink_on"] = not state["blink_on"]
-            
+
             for c in list(store.active):
                 if c.get("exit") is None:
                     continue
                 exit_dt = datetime.fromisoformat(c["exit"])
                 rem = (exit_dt - n).total_seconds()
-                
+
                 if rem <= 0 and c["id"] not in state["alerted_ids"]:
                     state["alerted_ids"].add(c["id"])
                     state["alert_queue"].append(c)
                     if not state["alert_open"]:
                         process_alert_queue()
-            
+
             if state["view"] == "main":
                 render()
 
     page.run_task(background_loop)
 
+
 if __name__ == "__main__":
-    ft.app(target=main)
+    ft.run(main)
