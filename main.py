@@ -20,7 +20,7 @@ DATA_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "top_data.j
 BG = "#070b19"          # Dərin qaranlıq göy fon
 CARD_BG = "#111827"     # Kartlar üçün şık tünd rəng
 CARD_WARN = "#581c87"   # Vaxtı azalanlar üçün bənövşəyi-tünd qırmızı ton
-CARD_WARN2 = "#7e22ce"  # Yanıp-sönmə effekti üçün
+CARD_WARN2 = "#7e22ce"  # Yanıb-sönmə effekti üçün
 ACCENT = "#06b6d4"      # Canlı neon mavi (Cyan)
 GREEN = "#10b981"       # Uğurlu / Normal vaxt yaşı
 ORANGE = "#f59e0b"      # Xəbərdarlıq sarısı
@@ -117,7 +117,7 @@ async def main(page: ft.Page):
     page.theme_mode = ft.ThemeMode.DARK
     page.scroll = None
     
-    # Mobil üçün tam ekran və responsiv parametrlər
+    # Mobil üçün tam ekran və düzgün hizalama
     page.vertical_alignment = ft.MainAxisAlignment.START
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
 
@@ -137,7 +137,7 @@ async def main(page: ft.Page):
     list_column = ft.ListView(expand=True, spacing=10, padding=12, auto_scroll=False)
     subtitle_text = ft.Text("Batutda aktiv olan uşaqlar", size=13, color=MUTED, weight=ft.FontWeight.W_500)
 
-    # ---------- Universal Modal Overlay (Şık animasiyalı) ----------
+    # ---------- Universal Modal Overlay ----------
     overlay_container = ft.Container(
         visible=False,
         bgcolor="#000000DD",
@@ -155,7 +155,6 @@ async def main(page: ft.Page):
             padding=24,
             width=360,
             shadow=ft.BoxShadow(spread_radius=2, blur_radius=20, color="#00000088"),
-            animate_scale=ft.Animation(300, ft.AnimationCurve.EASE_OUT_BACK),
         )
         overlay_container.content = ft.Column(
             [box],
@@ -170,7 +169,7 @@ async def main(page: ft.Page):
         overlay_container.visible = False
         page.update()
 
-    # ---------- Kart Qurucu (Mobil üçün ölçüləndirilmiş) ----------
+    # ---------- Kart Qurucu (Mobil üçün tam uyğun) ----------
     def build_card(c, remaining):
         is_infinite = c.get("exit") is None
         is_warn = not is_infinite and (0 < remaining <= 180)
@@ -201,7 +200,6 @@ async def main(page: ft.Page):
         async def on_delete(e, cid=c["id"]):
             await manual_remove(cid, page)
 
-        # Mobil ekranda düymələrin sıxışmaması üçün kompakt Row quruluşu
         action_buttons = [
             ft.Container(
                 content=ft.ElevatedButton(
@@ -319,7 +317,6 @@ async def main(page: ft.Page):
                     remaining = (exit_dt - n).total_seconds()
                 items.append((remaining, c))
             
-            # Sıralama: limitsizlər sona, qalanlar azalan vaxta görə
             items.sort(key=lambda x: (x[0] == float('inf'), x[0]))
             
             if not items:
@@ -328,7 +325,7 @@ async def main(page: ft.Page):
                         content=ft.Column([
                             ft.Text("🎈", size=50),
                             ft.Text("Hazırda batutda uşaq yoxdur", color=MUTED, size=15, weight=ft.FontWeight.BOLD),
-                            ft.Text("Yeni uşaq əlavə etmək üçün aşağıdakı düyməni istifadə edin.", color=MUTED, size=12, text_align=ft.TextAlign.CENTER)
+                            ft.Text("Yeni uşaq əlavə etmək üçün düyməni istifadə edin.", color=MUTED, size=12, text_align=ft.TextAlign.CENTER)
                         ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=8),
                         padding=60, alignment=ft.alignment.center
                     )
@@ -338,7 +335,7 @@ async def main(page: ft.Page):
         
         page.update()
 
-    # ---------- Vaxt Artırma və Silmə Əməliyyatları ----------
+    # ---------- Vaxt Artırma və Silmə ----------
     async def extend_time(child_id, minutes):
         for c in store.active:
             if c["id"] == child_id and c.get("exit"):
@@ -467,7 +464,6 @@ async def main(page: ft.Page):
 
         entry_time_text = ft.Text(fmt_time(now()), size=14, weight=ft.FontWeight.BOLD, color=GREEN)
 
-        # Seçimlər: 30 dəq, 60 dəq, Limitsiz (90 və 120 silindi)
         duration_state = {"value": 30}
         duration_buttons = {}
 
@@ -545,7 +541,7 @@ async def main(page: ft.Page):
         )
         show_modal(content_col)
 
-    # ---------- Naviqasiya Başlığı (Header) ----------
+    # ---------- Naviqasiya Başlığı ----------
     def switch_view(view_name):
         state["view"] = view_name
         if view_name == "main":
@@ -577,7 +573,7 @@ async def main(page: ft.Page):
         padding=12, bgcolor="#0f172a", border=ft.border.only(bottom=ft.BorderSide(1, "#1e293b"))
     )
 
-    # ---------- Əsas Səhifə Struktur (Layout) ----------
+    # ---------- Əsas Səhifə Struktur ----------
     body_container = ft.Container(
         content=ft.Column([
             header_row,
@@ -625,9 +621,8 @@ async def main(page: ft.Page):
 
     render()
 
-    # ---------- Fon Proseslər (Timer və Yenilənmə) ----------
+    # ---------- Fon Proseslər ----------
     async def background_loop():
-        blink_counter = 0
         while True:
             await asyncio.sleep(1)
             await store.check_daily_reset()
@@ -635,7 +630,6 @@ async def main(page: ft.Page):
             n = now()
             state["blink_on"] = not state["blink_on"]
             
-            # Vaxtı bitənləri yoxla
             for c in list(store.active):
                 if c.get("exit") is None:
                     continue
@@ -655,13 +649,3 @@ async def main(page: ft.Page):
 
 if __name__ == "__main__":
     ft.app(target=main)
-```eof
-
-### Əsas Edilən Dəyişikliklər və Yeniliklər:
-1. **Mobil Tam Uyğunluq (Responsive & Full Phone Setup):** Bütün elementlər, düymələr və grid strukturları smartfon ekranlarında kənara daşmayacaq, tam səliqəli yerləşəcək şəkildə konfiqurasiya edildi.
-2. **Müddət Seçimləri:** İstəyinizə uyğun olaraq 90 və 120 dəqiqə seçimləri tamamilə silindi, yerində yalnız **30 dəq**, **60 dəq** və **Limitsiz ∞** seçimləri saxlanıldı.
-3. **Deluxe & Premium Dizayn + Animasiyalar:** Müasir tünd göy, cyan (neon mavi) və qızılı elementlərdən ibarət rəng palitrası tətbiq olundu. Kartların açılış/keçid animasiyaları və modal pəncərələrin şık görünüşü gücləndirildi.
-4. **Azərbaycan Əlifbası Dəstəyi:** UTF-8 kodlaşdırması və Azərbaycan hərfləri (`ə, ç, ö, ğ, ü, ş, ı`) üçün tam dəstək təmin edildi.
-5. **Mütləq İmza:** Proqramın ən aşağı hissəsində tələb olunduğu kimi **"Owner by Sərkər Qubadov"** imzası əlavə edildi.
-
-Seanslarınızı problemsiz idarə etməniz diləyi ilə!
